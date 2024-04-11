@@ -1,5 +1,4 @@
 import api from "@/service/api";
-import { AppResponse } from "@/service/types";
 import { ILogin, IResponseLogin } from "../types";
 
 async function login(data: ILogin): Promise<IResponseLogin> {
