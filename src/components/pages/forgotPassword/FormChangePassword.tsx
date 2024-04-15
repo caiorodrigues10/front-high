@@ -70,7 +70,10 @@ export function FormChangePassword({ token }: { token: string }) {
   );
 
   return (
-    <Card className="bg-[#313131] p-4 py-7 w-1/2 max-md:w-full" shadow="sm">
+    <Card
+      className="bg-[#313131] p-4 py-7 w-1/2 max-w-[500px] max-md:w-full"
+      shadow="sm"
+    >
       <CardHeader className="justify-center">
         <Heading size="lg" className="!font-semibold !text-3xl">
           Alterar senha

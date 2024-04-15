@@ -4,6 +4,7 @@ import {
   useCallback,
   useContext,
   useEffect,
+  useRef,
   useState,
 } from "react";
 
@@ -19,14 +20,14 @@ function TimerProvider({ children }: PropsWithChildren) {
   const [counter, setCounter] = useState(120);
   const [isRunning, setIsRunning] = useState(false);
 
-  let interval: NodeJS.Timeout;
+  const intervalRef = useRef<NodeJS.Timeout>();
 
   useEffect(() => {
     if (isRunning) {
-      interval = setInterval(() => {
+      intervalRef.current = setInterval(() => {
         setCounter((prevCounter) => {
           if (prevCounter <= 0) {
-            clearInterval(interval);
+            clearInterval(intervalRef.current);
             setIsRunning(false);
             return 0;
           }
@@ -35,7 +36,7 @@ function TimerProvider({ children }: PropsWithChildren) {
       }, 1000);
     }
 
-    return () => clearInterval(interval);
+    return () => clearInterval(intervalRef.current);
   }, [isRunning]);
 
   const formatTime = () => {

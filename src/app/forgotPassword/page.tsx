@@ -1,4 +1,3 @@
-import BodyPage from "@/components/BodyPage";
 import { FormChangePassword } from "@/components/pages/forgotPassword/FormChangePassword";
 import { IVerifyTokenForgotPassword } from "@/service/users/types";
 import { useServer } from "@/utils/useServer";
@@ -18,8 +17,8 @@ export default async function ForgotPasswordPage({
   }
 
   return (
-    <BodyPage navBarDisable>
+    <div className="flex w-full h-full min-h-screen min-w-screen justify-center items-center p-8">
       <FormChangePassword token={searchParams.token || ""} />
-    </BodyPage>
+    </div>
   );
 }

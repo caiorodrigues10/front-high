@@ -89,7 +89,7 @@ export function LoginForm({
       }
       setIsLoading(false);
     },
-    [toast]
+    [toast, push]
   );
 
   return (

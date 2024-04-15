@@ -42,26 +42,29 @@ export function RecoveryPassword() {
     resolver: yupResolver(forgotPasswordSchema),
   });
 
-  const submit = useCallback(async (data: ISendEmailForgotPassword) => {
-    setIsLoading(true);
-    const response = await forgotPassword(data);
+  const submit = useCallback(
+    async (data: ISendEmailForgotPassword) => {
+      setIsLoading(true);
+      const response = await forgotPassword(data);
 
-    if (response && response.result === "success") {
-      startCounter();
-      toast({
-        description: response.message,
-        title: "Sucesso!",
-        className: "toast-success",
-      });
-    } else {
-      toast({
-        description: response?.message || "Tente novamente mais tarde!",
-        variant: "destructive",
-        title: "Erro!",
-      });
-    }
-    setIsLoading(false);
-  }, []);
+      if (response && response.result === "success") {
+        startCounter();
+        toast({
+          description: response.message,
+          title: "Sucesso!",
+          className: "toast-success",
+        });
+      } else {
+        toast({
+          description: response?.message || "Tente novamente mais tarde!",
+          variant: "destructive",
+          title: "Erro!",
+        });
+      }
+      setIsLoading(false);
+    },
+    [startCounter, toast]
+  );
 
   return (
     <>

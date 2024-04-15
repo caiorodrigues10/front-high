@@ -68,28 +68,31 @@ export function SingUpForm({
   const toggleVisibility = () => setIsVisible(!isVisible);
   const toggleVisibilityConfirm = () => setIsVisibleConfirm(!isVisibleConfirm);
 
-  const submit = useCallback(async (data: ICreateUser) => {
-    setIsLoading(true);
+  const submit = useCallback(
+    async (data: ICreateUser) => {
+      setIsLoading(true);
 
-    const response = await createUser(data);
+      const response = await createUser(data);
 
-    if (response && response.result === "success") {
-      toast({
-        description: response.message,
-        title: "Sucesso!",
-        className: "toast-success",
-      });
-      startCounter();
-      setIsCreated(true);
-    } else {
-      toast({
-        description: response?.message || "Tente novamente mais tarde!",
-        variant: "destructive",
-        title: "Erro!",
-      });
-    }
-    setIsLoading(false);
-  }, []);
+      if (response && response.result === "success") {
+        toast({
+          description: response.message,
+          title: "Sucesso!",
+          className: "toast-success",
+        });
+        startCounter();
+        setIsCreated(true);
+      } else {
+        toast({
+          description: response?.message || "Tente novamente mais tarde!",
+          variant: "destructive",
+          title: "Erro!",
+        });
+      }
+      setIsLoading(false);
+    },
+    [startCounter, toast]
+  );
 
   const submitConfirmCode = useCallback(
     async ({ code }: { code: string }) => {
@@ -99,7 +102,6 @@ export function SingUpForm({
         code: Number(code),
         email: getValues("email"),
       });
-      console.log(response);
 
       if (response && response.result === "success") {
         toast({
@@ -118,7 +120,7 @@ export function SingUpForm({
       }
       setIsLoading(false);
     },
-    [push]
+    [getValues, push, toast]
   );
 
   const submitResendCode = useCallback(async () => {
@@ -138,7 +140,7 @@ export function SingUpForm({
         title: "Erro!",
       });
     }
-  }, [startCounter]);
+  }, [getValues, startCounter, toast]);
 
   return (
     <Card className="bg-[#313131] p-4 py-7" shadow="sm">
