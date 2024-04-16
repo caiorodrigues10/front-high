@@ -6,7 +6,7 @@ export function TextInput({ ...rest }: InputProps) {
     input: [
       "bg-transparent",
       "!text-white/90 text-sm",
-      "placeholder:text-default-700/50 dark:placeholder:text-white/60",
+      "placeholder:text-zinc-500 dark:placeholder:text-white/60",
     ],
     inputWrapper: [
       "shadow-xl",
@@ -15,6 +15,7 @@ export function TextInput({ ...rest }: InputProps) {
       "focus-within:!bg-[#161616]",
       "!cursor-text",
     ],
+    clearButton: "text-red-400",
   };
 
   return <Input {...rest} classNames={{ ...styles }} />;

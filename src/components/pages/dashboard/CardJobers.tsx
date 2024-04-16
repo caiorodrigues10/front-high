@@ -98,7 +98,10 @@ export function CardJobers() {
             positionProgress: "n/d",
           },
         ].map((e, i) => (
-          <div className="flex w-full justify-between items-center" key={i}>
+          <div
+            className="flex w-full justify-between items-center hover:bg-zinc-200/10 px-4 py-2 cursor-pointer rounded-xl duration-200 border border-transparent hover:border-zinc-500 active:scale-95"
+            key={i}
+          >
             <div className="flex gap-4 w-full items-center">
               <Image
                 src={e.image || "/user-default.png"}
@@ -108,14 +111,18 @@ export function CardJobers() {
                 className="rounded-full h-[40px]"
               />
               <div className="flex flex-col gap-1">
-                <Heading className="!font-semibold">{e.name}</Heading>
+                <Heading className="!font-semibold" size="sm">
+                  {e.name}
+                </Heading>
                 <p className="text-[#848484]">{e.services} serviços</p>
               </div>
             </div>
             <div className="flex gap-2 items-center">
               <Heading
                 size={e.position !== 1 ? "md" : "lg"}
-                className={clsx({ "text-[#B7B7B7] ": e.position !== 1 })}
+                className={clsx({
+                  "!text-[#B7B7B7] !font-medium": e.position !== 1,
+                })}
               >
                 {e.position}°
               </Heading>

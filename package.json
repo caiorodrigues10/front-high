@@ -13,6 +13,7 @@
     "@nextui-org/react": "^2.2.10",
     "@radix-ui/react-slot": "^1.0.2",
     "@radix-ui/react-toast": "^1.1.5",
+    "@react-stately/data": "^3.11.2",
     "@types/js-cookie": "^3.0.6",
     "axios": "^1.6.8",
     "class-variance-authority": "^0.7.0",
