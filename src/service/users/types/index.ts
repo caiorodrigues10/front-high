@@ -6,10 +6,25 @@ interface ICreateUser {
   name: string;
   password: string;
   confirmPass: string;
+  userPermissionsId?: string;
+}
+
+interface IEditUser {
+  email: string;
+  name: string;
+  password?: string;
+  confirmPass?: string;
+  userPermissionsId: string;
 }
 
 interface IVerifyTokenForgotPassword {
   token: string;
+}
+
+interface IPermissions {
+  description: string;
+  id: string;
+  tagPermission: string;
 }
 
 interface IUser {
@@ -18,11 +33,7 @@ interface IUser {
   name: string;
   active: false;
   createdAt: string;
-  userpermissions: {
-    description: string;
-    id: string;
-    tagPermission: string;
-  };
+  userpermissions: IPermissions;
 }
 
 interface IListUserResponse {
@@ -36,4 +47,6 @@ export type {
   IUser,
   IListUserResponse,
   IVerifyTokenForgotPassword,
+  IPermissions,
+  IEditUser,
 };

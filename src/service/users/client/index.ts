@@ -1,6 +1,7 @@
 import api from "@/service/api";
 import { AppResponse } from "@/service/types";
-import { ICreateUser, ISendEmailForgotPassword } from "../types";
+import { getCookie } from "@/utils/cookie";
+import { ICreateUser, IEditUser, ISendEmailForgotPassword } from "../types";
 
 async function forgotPassword(
   data: ISendEmailForgotPassword
@@ -25,6 +26,52 @@ async function createUser(data: ICreateUser): Promise<AppResponse> {
       "Content-Type": "application/json",
     },
     body: JSON.stringify(data),
+  })
+    .then((res) => res.json())
+    .catch((err) => err.response);
+
+  return response;
+}
+
+async function editUser(data: IEditUser, id: string): Promise<AppResponse> {
+  const token = getCookie("high.token");
+  const response = await fetch(`${api}/users/${id}`, {
+    method: "PUT",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`,
+    },
+    body: JSON.stringify(data),
+  })
+    .then((res) => res.json())
+    .catch((err) => err.response);
+
+  return response;
+}
+
+async function inactiveUser(id: string): Promise<AppResponse> {
+  const token = getCookie("high.token");
+  const response = await fetch(`${api}/users/${id}`, {
+    method: "DELETE",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`,
+    },
+  })
+    .then((res) => res.json())
+    .catch((err) => err.response);
+
+  return response;
+}
+
+async function reactiveUser(id: string): Promise<AppResponse> {
+  const token = getCookie("high.token");
+  const response = await fetch(`${api}/users/reactive/${id}`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`,
+    },
   })
     .then((res) => res.json())
     .catch((err) => err.response);
@@ -81,4 +128,13 @@ async function changePassword(data: {
   return response;
 }
 
-export { forgotPassword, createUser, confirmCode, resendCode, changePassword };
+export {
+  forgotPassword,
+  createUser,
+  confirmCode,
+  resendCode,
+  changePassword,
+  editUser,
+  inactiveUser,
+  reactiveUser,
+};

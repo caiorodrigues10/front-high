@@ -51,8 +51,10 @@ export function LoginForm({
   const submit = useCallback(
     async (data: ILogin) => {
       setIsLoading(true);
+      console.log({ data });
 
       const response = await login(data);
+
       if (response && response.result === "success") {
         toast({
           description: response.message,
@@ -78,6 +80,11 @@ export function LoginForm({
           expirationDays: 1,
           name: "high.email",
           value: response.data.user.email,
+        });
+        addCookie({
+          expirationDays: 30,
+          name: "high.refreshToken",
+          value: response.data.refreshToken,
         });
         push("/dashboard");
       } else {

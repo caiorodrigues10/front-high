@@ -1,18 +1,16 @@
 "use client";
 import { useSideBarContext } from "@/context/SideBarContext";
-import { Chip, Divider } from "@nextui-org/react";
+import { Divider } from "@nextui-org/react";
 import clsx from "clsx";
 import { motion } from "framer-motion";
-import { ChevronRight } from "lucide-react";
 import { usePathname } from "next/navigation";
-import { useState } from "react";
 import { SideBarBody } from "./SideBarBody";
 import { SideBarFooter } from "./SideBarFooter";
 import SideBarHeader from "./SideBarHeader";
 import SideBarMessages from "./SideBarMessages";
 
 export function SideBar() {
-  const { asideIsOpen, setAsideIsOpen } = useSideBarContext();
+  const { asideIsOpen } = useSideBarContext();
   const path = usePathname();
 
   return (
@@ -24,7 +22,7 @@ export function SideBar() {
           relative: asideIsOpen && asideIsOpen,
         }
       )}
-      initial={{ x: -350 }}
+      initial={{ x: asideIsOpen ? 0 : -350 }}
       animate={{ x: asideIsOpen ? 0 : -350 }}
       transition={{ type: "tween" }}
     >

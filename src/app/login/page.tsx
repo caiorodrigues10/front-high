@@ -1,8 +1,16 @@
 import { Heading } from "@/components/Heading";
 import { CardForms } from "@/components/pages/login/client/CardForms";
+import { cookies } from "next/headers";
 import Image from "next/image";
+import { redirect } from "next/navigation";
 
 export default function LoginPage() {
+  const token = cookies().get("high.token");
+
+  if (token) {
+    return redirect("/dashboard");
+  }
+
   return (
     <div className="flex w-full h-screen justify-between">
       <div className="flex w-full h-full justify-center items-center">

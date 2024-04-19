@@ -3,7 +3,8 @@ import { cookies } from "next/headers";
 import { ReactNode } from "react";
 import { ClientOnly } from "./ClientOnly";
 import NavBar from "./NavBar";
-import NavBarAdmin from "./NavBarAdmin";
+import { NavBarAdmin } from "./NavBarAdmin";
+import { Skeleton } from "./ui/skeleton";
 
 interface BodyPageProps {
   title: string;
@@ -25,9 +26,7 @@ export function BodyPage({
     <div className="scrollbar-hide relative flex w-full flex-1 flex-col items-center overflow-hidden">
       {String(accessLevel) === "common_user" && <NavBar />}
       {String(accessLevel) === "admin_user" && (
-        <ClientOnly>
-          <NavBarAdmin breadcrumbs={breadcrumbs} title={title} />
-        </ClientOnly>
+        <NavBarAdmin breadcrumbs={breadcrumbs} title={title} />
       )}
 
       <main

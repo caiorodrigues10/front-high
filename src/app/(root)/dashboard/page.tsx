@@ -5,7 +5,7 @@ export default function DashboardPage() {
   return (
     <BodyPage
       title="Dashboard"
-      breadcrumbs={[{ name: "Dashboard", href: "/dashboard" }]}
+      breadcrumbs={[{ name: "dashboard", href: "/dashboard" }]}
     >
       <BodyDashboard />
     </BodyPage>

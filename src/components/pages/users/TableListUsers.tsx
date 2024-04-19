@@ -1,6 +1,13 @@
 "use client";
 import { Heading } from "@/components/Heading";
+import { PaginationTable } from "@/components/PaginationTable";
 import { TextInput } from "@/components/TextInput";
+import { useToast } from "@/components/ui/use-toast";
+import {
+  PaginationTableProvider,
+  usePaginationTableContext,
+} from "@/context/PaginationTableContext";
+import { inactiveUser, reactiveUser } from "@/service/users/client";
 import { IListUserResponse, IUser } from "@/service/users/types";
 import {
   Button,
@@ -12,38 +19,57 @@ import {
   DropdownItem,
   DropdownMenu,
   DropdownTrigger,
-  Pagination,
+  Modal,
+  ModalBody,
+  ModalContent,
+  ModalFooter,
+  ModalHeader,
   Table,
   TableBody,
   TableCell,
   TableColumn,
   TableHeader,
   TableRow,
+  useDisclosure,
   User,
 } from "@nextui-org/react";
+import clsx from "clsx";
 import { EllipsisVertical, Search } from "lucide-react";
-import React, { useCallback, useMemo, useState } from "react";
+import { useRouter } from "next/navigation";
+import React, { Key, useCallback, useMemo, useState } from "react";
 
 export function TableListUsers({ users }: { users: IListUserResponse }) {
   const [filterValue, setFilterValue] = useState("");
-  const [rowsPerPage, setRowsPerPage] = useState(5);
+  const { isOpen, onOpen, onClose } = useDisclosure();
+  const [isLoading, setIsLoading] = useState(false);
+  const [userId, setUserId] = useState("");
+  const [isReactiveUser, setIsReactiveUser] = useState(false);
+  const { toast } = useToast();
+  const { push, refresh } = useRouter();
+  const { page, setPage, rowsPerPage } = usePaginationTableContext();
+
+  const handleOpenModal = (id: string) => {
+    setUserId(id);
+    onOpen();
+    setIsReactiveUser(false);
+  };
+
+  const handleOpenModalReactive = (id: string) => {
+    setUserId(id);
+    onOpen();
+    setIsReactiveUser(true);
+  };
 
   const headerColumns = useMemo(
     () => [
       { name: "Nome", uid: "name" },
-      { name: "Email", uid: "email" },
       { name: "Permissão", uid: "role" },
+      { name: "Data de criação", uid: "createdAt" },
       { name: "Status", uid: "status" },
       { name: "Ações", uid: "actions" },
     ],
     []
   );
-
-  const [page, setPage] = useState(1);
-
-  const hasSearchFilter = Boolean(filterValue);
-
-  const pages = Math.ceil(users.list.length / rowsPerPage);
 
   const items = useMemo(() => {
     const start = (page - 1) * rowsPerPage;
@@ -52,7 +78,7 @@ export function TableListUsers({ users }: { users: IListUserResponse }) {
     return users.list.slice(start, end);
   }, [page, users, rowsPerPage]);
 
-  const renderCell = useCallback((user: IUser, columnKey: React.Key) => {
+  const renderCell = useCallback((user: IUser, columnKey: Key) => {
     const cellValue = user[columnKey as keyof IUser];
 
     switch (columnKey) {
@@ -88,6 +114,12 @@ export function TableListUsers({ users }: { users: IListUserResponse }) {
             {user.active ? "Ativo" : "Inativo"}
           </Chip>
         );
+      case "createdAt":
+        return (
+          new Date(user.createdAt)?.toLocaleDateString() +
+          " - " +
+          new Date(user.createdAt)?.toLocaleTimeString()
+        );
       case "actions":
         return (
           <div className="relative flex justify-end items-center gap-2">
@@ -102,12 +134,30 @@ export function TableListUsers({ users }: { users: IListUserResponse }) {
                 </Button>
               </DropdownTrigger>
               <DropdownMenu>
-                <DropdownItem className="hover:!bg-zinc-900 hover:!text-white">
+                <DropdownItem
+                  className={clsx("hover:!bg-zinc-900 hover:!text-white", {
+                    "text-zinc-400 hover:!bg-zinc-800 hover:!text-zinc-400 cursor-not-allowed":
+                      !user.active,
+                  })}
+                  onClick={() => user.active && push("/users/" + user.id)}
+                >
                   Editar
                 </DropdownItem>
-                <DropdownItem className="hover:!bg-zinc-900 hover:!text-white">
-                  Inativar
-                </DropdownItem>
+                {user.active ? (
+                  <DropdownItem
+                    className="hover:!bg-zinc-900 hover:!text-white"
+                    onClick={() => handleOpenModal(user.id)}
+                  >
+                    Inativar
+                  </DropdownItem>
+                ) : (
+                  <DropdownItem
+                    className="hover:!bg-zinc-900 hover:!text-white"
+                    onClick={() => handleOpenModalReactive(user.id)}
+                  >
+                    Reativar
+                  </DropdownItem>
+                )}
               </DropdownMenu>
             </Dropdown>
           </div>
@@ -117,27 +167,7 @@ export function TableListUsers({ users }: { users: IListUserResponse }) {
     }
   }, []);
 
-  const onNextPage = React.useCallback(() => {
-    if (page < pages) {
-      setPage(page + 1);
-    }
-  }, [page, pages]);
-
-  const onPreviousPage = React.useCallback(() => {
-    if (page > 1) {
-      setPage(page - 1);
-    }
-  }, [page]);
-
-  const onRowsPerPageChange = React.useCallback(
-    (e: React.ChangeEvent<HTMLSelectElement>) => {
-      setRowsPerPage(Number(e.target.value));
-      setPage(1);
-    },
-    []
-  );
-
-  const onSearchChange = React.useCallback((value?: string) => {
+  const onSearchChange = useCallback((value?: string) => {
     if (value) {
       setFilterValue(value);
       setPage(1);
@@ -146,104 +176,191 @@ export function TableListUsers({ users }: { users: IListUserResponse }) {
     }
   }, []);
 
-  const onClear = React.useCallback(() => {
+  const onClear = useCallback(() => {
     setFilterValue("");
     setPage(1);
   }, []);
 
-  const bottomContent = React.useMemo(() => {
+  const bottomContent = useMemo(() => {
     return (
-      <div className="flex items-center justify-between px-4">
-        <label className="flex items-center text-default-400 text-small">
-          Items por página:
-          <select
-            className="bg-transparent outline-none text-default-400 text-small"
-            onChange={onRowsPerPageChange}
-          >
-            <option value="15">15</option>
-            <option value="25">20</option>
-            <option value="50">50</option>
-          </select>
-        </label>
-        <span className="text-default-400 text-small">
-          Total {users.count} de usuários
-        </span>
-        <Pagination
-          isCompact
-          showControls
-          showShadow
-          className="flex justify-end"
-          classNames={{
-            item: "bg-zinc-800 text-zinc-300 [&[data-hover=true]:not([data-active=true])]:bg-zinc-900 active:!bg-zinc-900",
-            cursor: "text-white",
-            prev: "bg-zinc-800 text-white data-[disabled=true]:text-zinc-400 [&[data-hover=true]:not([data-active=true])]:bg-zinc-900 active:!bg-zinc-900",
-            next: "bg-zinc-800 text-white data-[disabled=true]:text-zinc-400 [&[data-hover=true]:not([data-active=true])]:bg-zinc-900 active:!bg-zinc-900",
-          }}
-          color="primary"
-          page={page}
-          total={pages}
-          onChange={setPage}
-        />
-      </div>
+      <PaginationTableProvider>
+        <PaginationTable count={users.count} />
+      </PaginationTableProvider>
     );
-  }, [items.length, page, pages, hasSearchFilter]);
+  }, [items.length]);
+
+  const submitInactiveUser = useCallback(async () => {
+    setIsLoading(true);
+
+    const response = await inactiveUser(userId);
+
+    if (response && response.result === "success") {
+      toast({
+        description: response.message,
+        title: "Sucesso!",
+        className: "toast-success",
+      });
+      onClose();
+      await fetch("/api/revalidate/users");
+      refresh();
+    } else {
+      toast({
+        description: response?.message || "Tente novamente mais tarde!",
+        variant: "destructive",
+        title: "Erro!",
+      });
+    }
+    setIsLoading(false);
+  }, [userId, refresh]);
+
+  const submitReactiveUser = useCallback(async () => {
+    setIsLoading(true);
+    const response = await reactiveUser(userId);
+
+    if (response && response.result === "success") {
+      toast({
+        description: response.message,
+        title: "Sucesso!",
+        className: "toast-success",
+      });
+      onClose();
+      await fetch("/api/revalidate/users");
+      refresh();
+    } else {
+      toast({
+        description: response?.message || "Tente novamente mais tarde!",
+        variant: "destructive",
+        title: "Erro!",
+      });
+    }
+    setIsLoading(false);
+  }, [userId, refresh]);
 
   return (
-    <Card className="bg-[#2C2C2C] border border-[#545454]">
-      <CardHeader className="flex justify-between items-center px-6 pt-4 pb-0">
-        <Heading>Listagem de usuários</Heading>
-        <TextInput
-          isClearable
-          className="w-full sm:max-w-[44%]"
-          placeholder="Search by name..."
-          startContent={<Search color="white" size={16} />}
-          value={filterValue}
-          onClear={() => onClear()}
-          onValueChange={onSearchChange}
-        />
-      </CardHeader>
-      <CardBody>
-        <Table
-          aria-label="Example table with custom cells, pagination and sorting"
-          isHeaderSticky
-          bottomContent={bottomContent}
-          bottomContentPlacement="outside"
-          classNames={{
-            wrapper:
-              "max-h-[382px] bg-[#373737] border border-zinc-700 scrollbar-hide",
-            td: "first:rounded-l-xl last:rounded-r-xl",
-            tr: " mt-4 text-white hover:bg-[#3e3e3e]",
-            th: "bg-[#1B1B1B] text-white",
-          }}
-        >
-          <TableHeader columns={headerColumns}>
-            {(column) => (
-              <TableColumn
-                key={column.uid}
-                align={column.uid === "actions" ? "center" : "start"}
-              >
-                {column.name}
-              </TableColumn>
-            )}
-          </TableHeader>
-          <TableBody
-            emptyContent={"Nenhum usuário encontrado"}
-            items={users.list}
+    <>
+      <Card className="bg-[#2C2C2C] border border-[#545454] w-full">
+        <CardHeader className="flex justify-between items-center px-6 pt-4 pb-0">
+          <Heading>Listagem de usuários</Heading>
+          <div className="flex gap-4">
+            <TextInput
+              isClearable
+              className="w-full sm:max-w-[50%]"
+              placeholder="Pesquise pelo nome..."
+              startContent={<Search color="white" size={16} />}
+              value={filterValue}
+              onClear={() => onClear()}
+              onValueChange={onSearchChange}
+            />
+            <Button
+              className="px-6 button-primary"
+              onPress={() => push("/users/create")}
+            >
+              Cadastrar novo usuário
+            </Button>
+          </div>
+        </CardHeader>
+        <CardBody>
+          <Table
+            aria-label="Example table with custom cells, pagination and sorting"
+            isHeaderSticky
+            bottomContent={bottomContent}
+            bottomContentPlacement="outside"
+            classNames={{
+              wrapper:
+                "max-h-[382px] bg-[#373737] border border-zinc-700 scrollbar-hide",
+              td: "first:rounded-l-xl last:rounded-r-xl",
+              tr: " mt-4 text-white hover:bg-[#3e3e3e]",
+              th: "bg-[#1B1B1B] text-white",
+            }}
           >
-            {(item) => (
-              <TableRow key={item.id}>
-                {(columnKey) => (
-                  <TableCell>
-                    {typeof renderCell(item, columnKey) === "object"
-                      ? renderCell(item, columnKey)
-                      : renderCell(item, columnKey)}
-                  </TableCell>
-                )}
-              </TableRow>
+            <TableHeader columns={headerColumns}>
+              {(column) => (
+                <TableColumn
+                  key={column.uid}
+                  className={clsx({
+                    "text-center": column.uid === "status",
+                    "text-end": column.uid === "actions",
+                  })}
+                >
+                  {column.name}
+                </TableColumn>
+              )}
+            </TableHeader>
+            <TableBody
+              emptyContent={"Nenhum usuário encontrado"}
+              items={users.list}
+            >
+              {(item) => (
+                <TableRow key={item.id}>
+                  {(columnKey) => (
+                    <TableCell
+                      className={clsx({
+                        "text-center": columnKey === "status",
+                      })}
+                    >
+                      {typeof renderCell(item, columnKey) === "object"
+                        ? renderCell(item, columnKey)
+                        : renderCell(item, columnKey)}
+                    </TableCell>
+                  )}
+                </TableRow>
+              )}
+            </TableBody>
+          </Table>
+        </CardBody>
+      </Card>
+
+      <Modal
+        backdrop="blur"
+        isOpen={isOpen}
+        onClose={() => {
+          onClose();
+        }}
+      >
+        <ModalContent className="bg-zinc-800">
+          <ModalHeader className="flex flex-col gap-1">
+            {isReactiveUser ? "Reativar usuário" : "Inativar usuário"}
+          </ModalHeader>
+          <ModalBody className="flex gap-4 flex-row items-end">
+            {isReactiveUser ? (
+              <Heading className="!font-semibold" size="sm">
+                Deseja realmente reativar este usuário?
+              </Heading>
+            ) : (
+              <Heading className="!font-semibold" size="sm">
+                Deseja realmente inativar este usuário?
+              </Heading>
             )}
-          </TableBody>
-        </Table>
-      </CardBody>
-    </Card>
+          </ModalBody>
+          <ModalFooter>
+            <Button
+              color="danger"
+              variant="light"
+              radius="full"
+              className="uppercase"
+              onPress={() => {
+                onClose();
+              }}
+            >
+              Não
+            </Button>
+            <Button
+              color={!isReactiveUser ? "danger" : "default"}
+              className={clsx("uppercase", {
+                "button-primary": isReactiveUser,
+              })}
+              type="button"
+              radius="full"
+              onPress={() => {
+                isReactiveUser ? submitReactiveUser() : submitInactiveUser();
+              }}
+              isLoading={isLoading}
+            >
+              Sim
+            </Button>
+          </ModalFooter>
+        </ModalContent>
+      </Modal>
+    </>
   );
 }
