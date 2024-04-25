@@ -13,13 +13,13 @@ export default async function EditUserPage({
     pathname: "users/" + params.id,
   });
 
-  if (!user || !user?.data) {
-    return redirect("/users");
-  }
-
   const permissions = await useServer<IPermissions[]>({
     pathname: "permissions",
   });
+
+  if (!user || !user?.data) {
+    return redirect("/users");
+  }
 
   return (
     <BodyPage

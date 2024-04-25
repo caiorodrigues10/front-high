@@ -64,9 +64,9 @@ export function FormCreateUser({
           title: "Sucesso!",
           className: "toast-success",
         });
-        await fetch("/api/revalidate/users");
-        refresh();
         push("/users");
+        refresh();
+        await fetch("/api/revalidate/users");
       } else {
         toast({
           description: response?.message || "Tente novamente mais tarde!",

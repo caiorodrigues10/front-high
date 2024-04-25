@@ -9,6 +9,7 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "@brazilian-utils/brazilian-utils": "^1.0.0-rc.12",
     "@hookform/resolvers": "^3.3.4",
     "@nextui-org/react": "^2.2.10",
     "@radix-ui/react-select": "^2.0.0",
@@ -16,6 +17,7 @@
     "@radix-ui/react-toast": "^1.1.5",
     "@react-stately/data": "^3.11.2",
     "@types/js-cookie": "^3.0.6",
+    "@types/uuid": "^9.0.8",
     "axios": "^1.6.8",
     "class-variance-authority": "^0.7.0",
     "clsx": "^2.1.0",
@@ -34,6 +36,7 @@
     "socket.io-client": "^4.7.5",
     "tailwind-merge": "^2.2.2",
     "tailwindcss-animate": "^1.0.7",
+    "uuid": "^9.0.1",
     "yup": "^1.4.0",
     "zod": "^3.22.4"
   },

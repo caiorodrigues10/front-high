@@ -8,7 +8,6 @@ import { Skeleton } from "./ui/skeleton";
 
 interface BodyPageProps {
   title: string;
-  subtitle?: string;
   children: ReactNode;
   breadcrumbs: { name: string; href: string }[];
   className?: string;

@@ -51,7 +51,6 @@ export function LoginForm({
   const submit = useCallback(
     async (data: ILogin) => {
       setIsLoading(true);
-      console.log({ data });
 
       const response = await login(data);
 

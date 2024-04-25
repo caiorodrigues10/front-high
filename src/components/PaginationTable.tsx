@@ -16,7 +16,7 @@ export function PaginationTable({ count }: { count: number }) {
         pathname + "?page=" + (page - 1) + "&limit=" + Number(e.target.value)
       );
     },
-    [push, pathname, rowsPerPage]
+    [push, pathname, page, setPage, setRowsPerPage]
   );
 
   const onChangePage = useCallback(
@@ -24,11 +24,12 @@ export function PaginationTable({ count }: { count: number }) {
       setPage(e);
       push(pathname + "?page=" + (e - 1) + "&limit=" + rowsPerPage);
     },
-    [rowsPerPage, pathname, page]
+    [rowsPerPage, pathname, push, setPage]
   );
 
   useEffect(() => {
     push(pathname + "?page=" + (page - 1) + "&limit=" + rowsPerPage);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const totalPages = Math.ceil(count / rowsPerPage);

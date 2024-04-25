@@ -48,17 +48,23 @@ export function TableListUsers({ users }: { users: IListUserResponse }) {
   const { push, refresh } = useRouter();
   const { page, setPage, rowsPerPage } = usePaginationTableContext();
 
-  const handleOpenModal = (id: string) => {
-    setUserId(id);
-    onOpen();
-    setIsReactiveUser(false);
-  };
+  const handleOpenModal = useCallback(
+    (id: string) => {
+      setUserId(id);
+      onOpen();
+      setIsReactiveUser(false);
+    },
+    [onOpen]
+  );
 
-  const handleOpenModalReactive = (id: string) => {
-    setUserId(id);
-    onOpen();
-    setIsReactiveUser(true);
-  };
+  const handleOpenModalReactive = useCallback(
+    (id: string) => {
+      setUserId(id);
+      onOpen();
+      setIsReactiveUser(true);
+    },
+    [onOpen]
+  );
 
   const headerColumns = useMemo(
     () => [
@@ -78,108 +84,114 @@ export function TableListUsers({ users }: { users: IListUserResponse }) {
     return users.list.slice(start, end);
   }, [page, users, rowsPerPage]);
 
-  const renderCell = useCallback((user: IUser, columnKey: Key) => {
-    const cellValue = user[columnKey as keyof IUser];
+  const renderCell = useCallback(
+    (user: IUser, columnKey: Key) => {
+      const cellValue = user[columnKey as keyof IUser];
 
-    switch (columnKey) {
-      case "name":
-        return (
-          <User
-            avatarProps={{ radius: "lg", src: "" }}
-            description={user.email}
-            name={user.name}
-          >
-            {user.email}
-          </User>
-        );
-      case "role":
-        return (
-          <div className="flex flex-col">
-            <p className="text-bold text-small capitalize">
-              {user.userpermissions.description}
-            </p>
-            <p className="text-bold text-tiny capitalize text-default-400">
-              {user.userpermissions.tagPermission}
-            </p>
-          </div>
-        );
-      case "status":
-        return (
-          <Chip
-            className="capitalize"
-            color={user.active ? "success" : "danger"}
-            size="sm"
-            variant="flat"
-          >
-            {user.active ? "Ativo" : "Inativo"}
-          </Chip>
-        );
-      case "createdAt":
-        return (
-          new Date(user.createdAt)?.toLocaleDateString() +
-          " - " +
-          new Date(user.createdAt)?.toLocaleTimeString()
-        );
-      case "actions":
-        return (
-          <div className="relative flex justify-end items-center gap-2">
-            <Dropdown
-              classNames={{
-                content: "bg-zinc-800",
-              }}
+      switch (columnKey) {
+        case "name":
+          return (
+            <User
+              avatarProps={{ radius: "lg", src: "" }}
+              description={user.email}
+              name={user.name}
             >
-              <DropdownTrigger>
-                <Button isIconOnly size="sm" variant="light">
-                  <EllipsisVertical className="text-default-300" />
-                </Button>
-              </DropdownTrigger>
-              <DropdownMenu>
-                <DropdownItem
-                  className={clsx("hover:!bg-zinc-900 hover:!text-white", {
-                    "text-zinc-400 hover:!bg-zinc-800 hover:!text-zinc-400 cursor-not-allowed":
-                      !user.active,
-                  })}
-                  onClick={() => user.active && push("/users/" + user.id)}
-                >
-                  Editar
-                </DropdownItem>
-                {user.active ? (
+              {user.email}
+            </User>
+          );
+        case "role":
+          return (
+            <div className="flex flex-col">
+              <p className="text-bold text-small capitalize">
+                {user.userpermissions.description}
+              </p>
+              <p className="text-bold text-tiny capitalize text-default-400">
+                {user.userpermissions.tagPermission}
+              </p>
+            </div>
+          );
+        case "status":
+          return (
+            <Chip
+              className="capitalize"
+              color={user.active ? "success" : "danger"}
+              size="sm"
+              variant="flat"
+            >
+              {user.active ? "Ativo" : "Inativo"}
+            </Chip>
+          );
+        case "createdAt":
+          return (
+            new Date(user.createdAt)?.toLocaleDateString() +
+            " - " +
+            new Date(user.createdAt)?.toLocaleTimeString()
+          );
+        case "actions":
+          return (
+            <div className="relative flex justify-end items-center gap-2">
+              <Dropdown
+                classNames={{
+                  content: "bg-zinc-800",
+                }}
+              >
+                <DropdownTrigger>
+                  <Button isIconOnly size="sm" variant="light">
+                    <EllipsisVertical className="text-default-300" />
+                  </Button>
+                </DropdownTrigger>
+                <DropdownMenu>
                   <DropdownItem
-                    className="hover:!bg-zinc-900 hover:!text-white"
-                    onClick={() => handleOpenModal(user.id)}
+                    className={clsx("hover:!bg-zinc-900 hover:!text-white", {
+                      "text-zinc-400 hover:!bg-zinc-800 hover:!text-zinc-400 cursor-not-allowed":
+                        !user.active,
+                    })}
+                    onClick={() => user.active && push("/users/" + user.id)}
                   >
-                    Inativar
+                    Editar
                   </DropdownItem>
-                ) : (
-                  <DropdownItem
-                    className="hover:!bg-zinc-900 hover:!text-white"
-                    onClick={() => handleOpenModalReactive(user.id)}
-                  >
-                    Reativar
-                  </DropdownItem>
-                )}
-              </DropdownMenu>
-            </Dropdown>
-          </div>
-        );
-      default:
-        return cellValue as string;
-    }
-  }, []);
+                  {user.active ? (
+                    <DropdownItem
+                      className="hover:!bg-zinc-900 hover:!text-white"
+                      onClick={() => handleOpenModal(user.id)}
+                    >
+                      Inativar
+                    </DropdownItem>
+                  ) : (
+                    <DropdownItem
+                      className="hover:!bg-zinc-900 hover:!text-white"
+                      onClick={() => handleOpenModalReactive(user.id)}
+                    >
+                      Reativar
+                    </DropdownItem>
+                  )}
+                </DropdownMenu>
+              </Dropdown>
+            </div>
+          );
+        default:
+          return cellValue as string;
+      }
+    },
+    [handleOpenModal, handleOpenModalReactive, push]
+  );
 
-  const onSearchChange = useCallback((value?: string) => {
-    if (value) {
-      setFilterValue(value);
-      setPage(1);
-    } else {
-      setFilterValue("");
-    }
-  }, []);
+  const onSearchChange = useCallback(
+    (value?: string) => {
+      if (value) {
+        setFilterValue(value);
+        setPage(1);
+      } else {
+        setFilterValue("");
+      }
+    },
+    [setPage]
+  );
 
   const onClear = useCallback(() => {
     setFilterValue("");
     setPage(1);
-  }, []);
+  }, [setPage]);
 
   const bottomContent = useMemo(() => {
     return (
@@ -187,7 +199,7 @@ export function TableListUsers({ users }: { users: IListUserResponse }) {
         <PaginationTable count={users.count} />
       </PaginationTableProvider>
     );
-  }, [items.length]);
+  }, [users]);
 
   const submitInactiveUser = useCallback(async () => {
     setIsLoading(true);
@@ -211,7 +223,7 @@ export function TableListUsers({ users }: { users: IListUserResponse }) {
       });
     }
     setIsLoading(false);
-  }, [userId, refresh]);
+  }, [userId, refresh, onClose, toast]);
 
   const submitReactiveUser = useCallback(async () => {
     setIsLoading(true);
@@ -234,7 +246,7 @@ export function TableListUsers({ users }: { users: IListUserResponse }) {
       });
     }
     setIsLoading(false);
-  }, [userId, refresh]);
+  }, [userId, refresh, onClose, toast]);
 
   return (
     <>

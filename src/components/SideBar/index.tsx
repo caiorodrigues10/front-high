@@ -33,7 +33,7 @@ export function SideBar() {
         <Divider className="bg-[#595959]" />
         <SideBarMessages />
       </div>
-      <SideBarFooter level="Admin" name="Administrador" logOut={() => {}} />
+      <SideBarFooter level="Admin" name="Administrador" />
     </motion.div>
   );
 }

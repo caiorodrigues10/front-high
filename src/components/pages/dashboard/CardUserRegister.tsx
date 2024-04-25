@@ -14,7 +14,7 @@ export function CardUserRegister() {
   return (
     <Card className="bg-[#2C2C2C] border border-[#545454] px-4 py-2 col-span-6">
       <CardHeader className="flex justify-between w-full items-center gap-16">
-        <Heading size="sm">Serviços</Heading>
+        <Heading size="sm">Usuários cadastrados</Heading>
         <Select
           size="sm"
           defaultSelectedKeys={["year"]}
