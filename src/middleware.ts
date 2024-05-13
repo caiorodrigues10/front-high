@@ -31,7 +31,6 @@ export const config = {
     "/users/:path*",
     "/dashboard/:path*",
     "/service/:path*",
-    "/typeService/:path*",
     "/elo/:path*",
   ],
 };

@@ -42,17 +42,6 @@ export function SideBarBody({ path }: { path: string }) {
           href={"/service"}
         />
         <SideBarItem
-          pathname={[
-            "/typeService",
-            "/typeService/create",
-            routeWithID("/typeService"),
-          ]}
-          name="Tipo de serviço"
-          icon={<Workflow />}
-          path={path}
-          href={"/typeService"}
-        />
-        <SideBarItem
           pathname={["/elo", "/elo/create", routeWithID("/elo")]}
           name="Elo"
           icon={<Swords />}

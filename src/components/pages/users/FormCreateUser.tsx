@@ -212,9 +212,10 @@ export function FormCreateUser({
         </CardBody>
         <CardFooter className="flex gap-4 justify-between">
           <Button
-            className="w-fit text-white hover:text-black hover:!bg-slate-300 border-slate-300 rounded-full uppercase"
+            color="secondary"
             type="button"
             variant="ghost"
+            radius="full"
             isLoading={isLoading}
             startContent={<ArrowLeft size={16} />}
             onPress={() => push("/users")}

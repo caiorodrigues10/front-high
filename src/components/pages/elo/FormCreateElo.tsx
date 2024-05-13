@@ -3,6 +3,8 @@ import { Heading } from "@/components/Heading";
 import { TextInput } from "@/components/TextInput";
 import { useToast } from "@/components/ui/use-toast";
 import { createElo } from "@/service/elo/client";
+import { currencyToFloat } from "@/utils/currencyToFloat";
+import { formatCurrency } from "@/utils/formatCurrency";
 import { yupResolver } from "@hookform/resolvers/yup";
 import {
   Button,
@@ -20,6 +22,7 @@ import { InferType, object, string } from "yup";
 const createEloSchema = object().shape({
   name: string().required("Nome é obrigatório"),
   position: string().required("Posição é obrigatório"),
+  price: string().required("Preço por tier é obrigatório"),
 });
 
 type ICreateEloSchema = InferType<typeof createEloSchema>;
@@ -33,6 +36,7 @@ export function FormCreateElo() {
     handleSubmit,
     control,
     formState: { errors },
+    setValue,
   } = useForm<ICreateEloSchema>({
     resolver: yupResolver(createEloSchema),
   });
@@ -44,6 +48,7 @@ export function FormCreateElo() {
       const response = await createElo({
         ...data,
         position: Number(data.position),
+        price: currencyToFloat(data.price || "0") || 0,
       });
 
       if (response && response.result === "success") {
@@ -106,10 +111,27 @@ export function FormCreateElo() {
               />
             )}
           />
+          <Controller
+            control={control}
+            name="price"
+            render={({ field }) => (
+              <TextInput
+                {...field}
+                label="Preço"
+                type="text"
+                labelPlacement="outside"
+                size="lg"
+                placeholder="Digite um valor"
+                onChange={(e) => {
+                  setValue("price", formatCurrency(e.target.value));
+                }}
+              />
+            )}
+          />
         </CardBody>
         <CardFooter className="flex gap-4 justify-between">
           <Button
-            className="w-fit text-white hover:text-black"
+            color="secondary"
             type="button"
             radius="full"
             variant="ghost"

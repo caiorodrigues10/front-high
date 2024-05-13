@@ -50,9 +50,7 @@ export function TableListServices({ services }: { services: IService[] }) {
 
   const headerColumns = useMemo(
     () => [
-      { name: "Tipo de serviço", uid: "typeService" },
-      { name: "Preço por tier", uid: "priceByTier" },
-      { name: "Elo", uid: "eloName" },
+      { name: "Nome", uid: "name" },
       { name: "Condições", uid: "rangeValues" },
       { name: "Ações", uid: "actions" },
     ],
@@ -64,12 +62,6 @@ export function TableListServices({ services }: { services: IService[] }) {
       const cellValue = service[columnKey as keyof IService];
 
       switch (columnKey) {
-        case "typeService":
-          return service.typeservice.name;
-        case "priceByTier":
-          return "R$ " + formatCurrency(service.priceByTier);
-        case "eloName":
-          return service.elo.name;
         case "rangeValues":
           return <p className="text-center">{service.rangeValues.length}</p>;
         case "actions":

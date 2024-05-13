@@ -112,7 +112,7 @@ export function FormEditElo({ elo }: { elo: IElo }) {
         </CardBody>
         <CardFooter className="flex gap-4 justify-between">
           <Button
-            className="w-fit text-white hover:text-black"
+            color="secondary"
             type="button"
             radius="full"
             variant="ghost"

@@ -1,12 +1,9 @@
 "use client";
 import { Heading } from "@/components/Heading";
-import { SelectInput } from "@/components/SelectInput";
 import { TextInput } from "@/components/TextInput";
 import { useToast } from "@/components/ui/use-toast";
-import { IElo } from "@/service/elo/types";
 import { createService } from "@/service/services/client";
 import { ICreateService, IRangeValues } from "@/service/services/types";
-import { ITypeService } from "@/service/typeService/types";
 import { yupResolver } from "@hookform/resolvers/yup";
 import {
   Button,
@@ -19,7 +16,6 @@ import {
   ModalContent,
   ModalFooter,
   ModalHeader,
-  SelectItem,
   useDisclosure,
 } from "@nextui-org/react";
 import clsx from "clsx";
@@ -31,9 +27,7 @@ import { v4 as uuidv4 } from "uuid";
 import { InferType, object, string } from "yup";
 
 const createServiceSchema = object().shape({
-  eloId: string().required("Elo é obrigatório"),
-  typeId: string().required("Tipo de serviço é obrigatório"),
-  priceByTier: string(),
+  name: string().required("Nome é obrigatório"),
 });
 
 type ICreateServiceSchema = InferType<typeof createServiceSchema>;
@@ -42,13 +36,7 @@ interface IRangeValuesWithID extends IRangeValues {
   id: string;
 }
 
-export function FormCreateService({
-  elo,
-  typeService,
-}: {
-  elo: IElo[];
-  typeService: ITypeService[];
-}) {
+export function FormCreateService() {
   const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
   const { push, refresh } = useRouter();
@@ -57,16 +45,7 @@ export function FormCreateService({
   const [rangeValue, setRangeValue] = useState<IRangeValuesWithID[]>([
     { name: "", id: uuidv4() },
   ]);
-  const formatCurrency = (value: string) => {
-    const numberValue = parseFloat(value.replace(/[^\d]/g, ""));
 
-    const formatted = new Intl.NumberFormat("pt-BR", {
-      style: "currency",
-      currency: "BRL",
-    }).format((numberValue || 0) / 100);
-
-    return formatted;
-  };
   const {
     handleSubmit,
     control,
@@ -75,16 +54,6 @@ export function FormCreateService({
   } = useForm<ICreateServiceSchema>({
     resolver: yupResolver(createServiceSchema),
   });
-
-  function currencyToFloat(valor: string) {
-    const clearValue = valor.replace(/[^\d.,]/g, "");
-
-    const valueWithDot = clearValue.replace(",", ".");
-
-    const floatValue = parseFloat(valueWithDot);
-
-    return floatValue;
-  }
 
   const removeItemRangeValues = (id: string) => {
     const newArray = rangeValue.filter((e) => e.id !== id);
@@ -97,7 +66,6 @@ export function FormCreateService({
 
       const newData = {
         ...data,
-        priceByTier: currencyToFloat(data.priceByTier || "0") || 0,
         rangeValues: rangeValue.filter((e) => {
           if (!e.percent && !e.name && !e.value) {
             return;
@@ -109,6 +77,8 @@ export function FormCreateService({
           };
         }),
       } as ICreateService;
+
+      console.log(newData);
 
       const response = await createService(newData);
 
@@ -155,71 +125,24 @@ export function FormCreateService({
           <CardBody className="flex flex-col gap-4">
             <Controller
               control={control}
-              name="priceByTier"
+              name="name"
               render={({ field }) => (
                 <TextInput
                   {...field}
-                  label="Preço"
+                  label="Nome"
                   type="text"
                   labelPlacement="outside"
                   size="lg"
-                  placeholder="Digite um valor"
-                  onChange={(e) => {
-                    setValue("priceByTier", formatCurrency(e.target.value));
-                  }}
+                  placeholder="Digite o nome"
+                  errorMessage={errors.name?.message}
+                  isInvalid={!!errors.name?.message}
                 />
-              )}
-            />
-
-            <Controller
-              control={control}
-              name="eloId"
-              render={({ field }) => (
-                <SelectInput
-                  {...field}
-                  size="lg"
-                  label="Elo"
-                  labelPlacement="outside"
-                  placeholder="Escolha um elo"
-                  className="w-full"
-                  isInvalid={!!errors.eloId?.message}
-                  errorMessage={errors.eloId?.message}
-                >
-                  {elo.map((e) => (
-                    <SelectItem key={e.id} value={e.id} className="!text-white">
-                      {e.name}
-                    </SelectItem>
-                  ))}
-                </SelectInput>
-              )}
-            />
-
-            <Controller
-              control={control}
-              name="typeId"
-              render={({ field }) => (
-                <SelectInput
-                  {...field}
-                  size="lg"
-                  label="Tipo de serviço"
-                  labelPlacement="outside"
-                  placeholder="Escolha um tipo de serviço"
-                  className="w-full"
-                  isInvalid={!!errors.typeId?.message}
-                  errorMessage={errors.typeId?.message}
-                >
-                  {typeService.map((e) => (
-                    <SelectItem key={e.id} value={e.id} className="!text-white">
-                      {e.name}
-                    </SelectItem>
-                  ))}
-                </SelectInput>
               )}
             />
           </CardBody>
           <CardFooter className="flex gap-4 justify-between">
             <Button
-              className="w-fit text-white hover:text-black"
+              color="secondary"
               type="button"
               radius="full"
               variant="ghost"
@@ -231,7 +154,7 @@ export function FormCreateService({
             </Button>
             <div className="flex gap-4">
               <Button
-                className="w-fit text-white hover:text-black"
+                color="secondary"
                 type="button"
                 radius="full"
                 variant="ghost"

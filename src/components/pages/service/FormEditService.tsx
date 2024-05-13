@@ -1,6 +1,5 @@
 "use client";
 import { Heading } from "@/components/Heading";
-import { SelectInput } from "@/components/SelectInput";
 import { TextInput } from "@/components/TextInput";
 import { useToast } from "@/components/ui/use-toast";
 import { IElo } from "@/service/elo/types";
@@ -18,7 +17,6 @@ import {
   ModalContent,
   ModalFooter,
   ModalHeader,
-  SelectItem,
   useDisclosure,
 } from "@nextui-org/react";
 import clsx from "clsx";
@@ -30,8 +28,7 @@ import { v4 as uuidv4 } from "uuid";
 import { InferType, object, string } from "yup";
 
 const editServiceSchema = object().shape({
-  eloId: string().required("Elo é obrigatório"),
-  priceByTier: string(),
+  name: string().required("Nome é obrigatório"),
 });
 
 type IEditServiceSchema = InferType<typeof editServiceSchema>;
@@ -72,12 +69,10 @@ export function FormEditService({
     handleSubmit,
     control,
     formState: { errors },
-    setValue,
   } = useForm<IEditServiceSchema>({
     resolver: yupResolver(editServiceSchema),
     defaultValues: {
-      eloId: service.elo.id,
-      priceByTier: formatCurrency(String(service.priceByTier)),
+      name: service.name,
     },
   });
 
@@ -102,7 +97,6 @@ export function FormEditService({
 
       const newData = {
         ...data,
-        priceByTier: currencyToFloat(data.priceByTier || "0") || 0,
         rangeValues: rangeValue.filter((e) => {
           if (!e.percent && !e.name && !e.value) {
             return;
@@ -111,7 +105,7 @@ export function FormEditService({
           return {
             name: e.name,
             percent: e.percent,
-            value: e.value,
+            value: e.value && currencyToFloat(e.value),
           };
         }),
       } as IEditService;
@@ -160,50 +154,24 @@ export function FormEditService({
           <CardBody className="flex flex-col gap-4">
             <Controller
               control={control}
-              name="priceByTier"
+              name="name"
               render={({ field }) => (
                 <TextInput
                   {...field}
-                  label="Preço"
+                  label="Nome"
                   type="text"
                   labelPlacement="outside"
                   size="lg"
-                  placeholder="Digite um valor"
-                  isInvalid={!!errors.priceByTier?.message}
-                  errorMessage={errors.priceByTier?.message}
-                  onChange={(e) => {
-                    setValue("priceByTier", formatCurrency(e.target.value));
-                  }}
+                  placeholder="Digite um nome"
+                  isInvalid={!!errors.name?.message}
+                  errorMessage={errors.name?.message}
                 />
-              )}
-            />
-
-            <Controller
-              control={control}
-              name="eloId"
-              render={({ field }) => (
-                <SelectInput
-                  {...field}
-                  size="lg"
-                  label="Elo"
-                  labelPlacement="outside"
-                  placeholder="Escolha um elo"
-                  className="w-full"
-                  isInvalid={!!errors.eloId?.message}
-                  errorMessage={errors.eloId?.message}
-                >
-                  {elo.map((e) => (
-                    <SelectItem key={e.id} value={e.id} className="!text-white">
-                      {e.name}
-                    </SelectItem>
-                  ))}
-                </SelectInput>
               )}
             />
           </CardBody>
           <CardFooter className="flex gap-4 justify-between">
             <Button
-              className="w-fit text-white hover:text-black"
+              color="secondary"
               type="button"
               radius="full"
               variant="ghost"
@@ -215,8 +183,8 @@ export function FormEditService({
             </Button>
             <div className="flex gap-4">
               <Button
-                className="w-fit text-white hover:text-black"
                 type="button"
+                color="secondary"
                 radius="full"
                 variant="ghost"
                 isLoading={isLoading}
@@ -279,6 +247,7 @@ export function FormEditService({
                     errorMessage={
                       !e.value && !e.percent && "Preencha valor ou porcentagem"
                     }
+                    isDisabled={!!e.value && currencyToFloat(e.value) !== 0}
                     isInvalid={!!e.value && !!e.percent}
                   />
                   <TextInput
@@ -287,14 +256,19 @@ export function FormEditService({
                     labelPlacement="outside"
                     size="lg"
                     placeholder="Digite o valor"
-                    defaultValue={e.value ? String(e.value) : ""}
+                    value={e.value ? formatCurrency(String(e.value)) : ""}
                     onChange={(event) =>
-                      updateRangeValue(e.id, "value", event.target.value)
+                      updateRangeValue(
+                        e.id,
+                        "value",
+                        formatCurrency(event.target.value)
+                      )
                     }
                     name={e.id}
                     errorMessage={
                       !e.value && !e.percent && "Preencha valor ou porcentagem"
                     }
+                    isDisabled={!!e.percent}
                     isInvalid={!!e.value && !!e.percent}
                   />
                   <Button
